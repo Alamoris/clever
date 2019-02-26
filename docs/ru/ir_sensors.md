@@ -222,11 +222,6 @@ irsend SEND_ONCE deviceName keyName
 ```python
 from py_irsend import irsend
 
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 7be687b86781758216a4235cecf71a943ca4ec87
 irsend.send_once('YourRemote', ['YourKey'])
 ```
 
