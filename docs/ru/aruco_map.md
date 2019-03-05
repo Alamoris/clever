@@ -94,7 +94,7 @@ navigate(0, 0, 2, frame_id='body', speed=0.5, auto_arm=True)  # взлет на 
 time.sleep(5)
 
 # Полет в координату 2:2 маркерного поля, высота 2 метра
-navigate(2, 2, 2, speed=1, frame_id='aruco_map')  # полет в координату 2:2, высота 3 метра
+navigate(2, 2, 2, speed=1, frame_id='aruco_map')
 ```
 
 ## Дополнительные настройки
