@@ -78,7 +78,7 @@ resolve_rosdep() {
 
   echo_stamp "Installing dependencies apps with rosdep in ${CATKIN_PATH}"
   cd ${CATKIN_PATH}
-  my_travis_retry rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} -r --os=${OS_DISTRO}:${OS_VERSION}
+  my_travis_retry rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --os=${OS_DISTRO}:${OS_VERSION}
 }
 
 INSTALL_ROS_PACK_SOURCES=${INSTALL_ROS_PACK_SOURCES:='false'}
@@ -135,17 +135,19 @@ if [ "${INSTALL_ROS_PACK_SOURCES}" = "true" ]; then
   chown -Rf pi:pi /home/pi/ros_catkin_ws
 fi
 
+export ROS_IP='127.0.0.1' # needed for running tests
+
 echo_stamp "Installing CLEVER" \
-&& git clone ${REPO} /home/pi/catkin_ws/src/clever \
 && cd /home/pi/catkin_ws/src/clever \
-&& echo "REF: ${REF}" \
-&& git checkout ${REF} \
+&& git status \
 && cd /home/pi/catkin_ws \
 && resolve_rosdep $(pwd) \
 && my_travis_retry pip install wheel \
 && my_travis_retry pip install -r /home/pi/catkin_ws/src/clever/clever/requirements.txt \
 && source /opt/ros/kinetic/setup.bash \
 && catkin_make -j2 -DCMAKE_BUILD_TYPE=Release \
+&& catkin_make run_tests \
+&& catkin_test_results \
 && systemctl enable roscore \
 && systemctl enable clever \
 && echo_stamp "All CLEVER was installed!" "SUCCESS" \
@@ -166,7 +168,7 @@ apt-get install -y --no-install-recommends \
     ros-kinetic-rosserial \
     ros-kinetic-usb-cam \
     ros-kinetic-vl53l1x \
-    ros-kinetic-opencv3=3.3.1neon-0stretch
+    ros-kinetic-opencv3=3.3.19-0stretch
 
 # TODO move GeographicLib datasets to Mavros debian package
 echo_stamp "Install GeographicLib datasets (needs for mavros)" \
@@ -180,7 +182,7 @@ cat << EOF >> /home/pi/.bashrc
 LANG='C.UTF-8'
 LC_ALL='C.UTF-8'
 ROS_DISTRO='kinetic'
-export ROS_IP='192.168.11.1'
+export ROS_HOSTNAME='raspberrypi.local'
 source /opt/ros/kinetic/setup.bash
 source /home/pi/catkin_ws/devel/setup.bash
 EOF

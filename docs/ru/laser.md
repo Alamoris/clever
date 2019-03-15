@@ -4,9 +4,22 @@
 
 Рекомендуемая для Клевера модель дальномера – STM VL53L1X. Это дальномер может измерять расстояния от 0 до 4 м, при этом обеспечивая высокую точность измерений.
 
-На [образе для Raspberry Pi](microsd_images.md) предустановен соответствующий ROS-драйвер.
+На [образе для Raspberry Pi](microsd_images.md) предустановлен соответствующий ROS-драйвер.
 
 ### Подключение к Raspberry Pi
+
+> **Note** Для корректной работы лазерного дальномера с полетным контроллером необходима <a id="download-firmware" href="https://github.com/CopterExpress/Firmware/releases">кастомная прошивка PX4</a>. Подробнее про прошивку см. [соответствующую статью](firmware.md).
+
+<script type="text/javascript">
+    fetch('https://api.github.com/repos/CopterExpress/Firmware/releases').then(res => res.json()).then(function(data) {
+        for (let release of data) {
+            if (!release.prerelease && !release.draft && release.tag_name.includes('-clever.')) {
+                document.querySelector('#download-firmware').href = release.html_url;
+                return;
+            }
+        }
+    });
+</script>
 
 Подключите дальномер по интерфейсу I²C к пинам 3V, GND, SCL и SDA:
 
@@ -24,7 +37,7 @@
 <arg name="rangefinder_vl53l1x" default="true"/>
 ```
 
-По умолчания драйер дальномера передает данные в Pixhawk (через топик `/mavros/distance_sensor/rangefinder_sub`). Для просмотра данных из топика используйте команду:
+По умолчания драйвер дальномера передает данные в Pixhawk (через топик `/mavros/distance_sensor/rangefinder_sub`). Для просмотра данных из топика используйте команду:
 
 ```bash
 rostopic echo mavros/distance_sensor/rangefinder_sub
@@ -32,7 +45,16 @@ rostopic echo mavros/distance_sensor/rangefinder_sub
 
 ### Настройки PX4
 
-TODO
+Для использования данных с дальномера в [PX4 должен быть сконфигурирован](px4_parameters.md).
+
+При использовании EKF2 (`SYS_MC_EST_GROUP` = `ekf2`):
+
+* `EKF2_HGT_MODE` = `2` (Range sensor) – при полете над горизонтальным полом;
+* `EKF2_RNG_AID` = `1` (Range aid enabled) – в остальных случаях.
+
+При использовании LPE (`SYS_MC_EST_GROUP` = `local_position_estimator, attitude_estimator_q`):
+
+* В параметре `LPE_FUSION` включен флажок "pub agl as lpos down" – при полете над горизонтальным полом.
 
 ### Получение данных из Python
 
@@ -52,7 +74,7 @@ rospy.Subscriber('mavros/distance_sensor/rangefinder_sub', Range, range_callback
 
 ### Визуализация данных
 
-Для посмотроения графика по данным с дальномера может быть использован rqt_multiplot.
+Для построения графика по данным с дальномера может быть использован rqt_multiplot.
 
 Для визуализации данных может быть использован rviz. Для этого необходимо добавить топик типа `sensor_msgs/Range` в визуализацию:
 

@@ -35,7 +35,7 @@ roscore -h
 rosversion clever
 rosversion aruco_pose
 rosversion vl53l1x
-#rosversion opencv3  # TODO
+rosversion opencv3
 rosversion mavros
 rosversion mavros_extras
 rosversion dynamic_reconfigure
@@ -44,3 +44,5 @@ rosversion compressed_image_transport
 rosversion rosbridge_suite
 rosversion rosserial
 rosversion usb_cam
+rosversion cv_camera
+rosversion web_video_server

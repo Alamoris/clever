@@ -65,7 +65,7 @@ private:
 	bool estimate_poses_, send_tf_;
 	double length_;
 	std::unordered_map<int, double> length_override_;
-	std::string frame_id_prefix_, known_orientation_;
+	std::string frame_id_prefix_, known_tilt_;
 	Mat camera_matrix_, dist_coeffs_;
 	aruco_pose::MarkerArray array_;
 	visualization_msgs::MarkerArray vis_array_;
@@ -86,7 +86,7 @@ public:
 		}
 		readLengthOverride();
 
-		nh_priv_.param<std::string>("known_orientation", known_orientation_, "");
+		nh_priv_.param<std::string>("known_tilt", known_tilt_, "");
 		nh_priv_.param<std::string>("frame_id_prefix", frame_id_prefix_, "aruco_");
 
 		camera_matrix_ = cv::Mat::zeros(3, 3, CV_64F);
@@ -151,9 +151,9 @@ private:
 					}
 				}
 
-				if (!known_orientation_.empty()) {
+				if (!known_tilt_.empty()) {
 					try {
-						snap_to = tf_buffer_.lookupTransform(msg->header.frame_id, known_orientation_,
+						snap_to = tf_buffer_.lookupTransform(msg->header.frame_id, known_tilt_,
 						                                     msg->header.stamp, ros::Duration(0.02));
 					} catch (const tf2::TransformException& e) {
 						ROS_WARN_THROTTLE(5, "aruco_detect: can't snap: %s", e.what());
@@ -169,20 +169,21 @@ private:
 
 			for (unsigned int i = 0; i < ids.size(); i++) {
 				marker.id = ids[i];
+				marker.length = getMarkerLength(marker.id);
 				fillCorners(marker, corners[i]);
 
 				if (estimate_poses_) {
-					fillPose(marker.pose.pose, rvecs[i], tvecs[i]);
+					fillPose(marker.pose, rvecs[i], tvecs[i]);
 
-					// snap orientation (if enabled and snap frame avaiable)
-					if (!known_orientation_.empty() && !snap_to.header.frame_id.empty()) {
-						snapOrientation(marker.pose.pose.orientation, snap_to.transform.rotation);
+					// snap orientation (if enabled and snap frame available)
+					if (!known_tilt_.empty() && !snap_to.header.frame_id.empty()) {
+						snapOrientation(marker.pose.orientation, snap_to.transform.rotation);
 					}
 
 					// TODO: check IDs are unique
 					if (send_tf_) {
 						transform.child_frame_id = getChildFrameId(ids[i]);
-						transform.transform.rotation = marker.pose.pose.orientation;
+						transform.transform.rotation = marker.pose.orientation;
 						fillTranslation(transform.transform.translation, tvecs[i]);
 						br_.sendTransform(transform);
 					}
@@ -203,7 +204,7 @@ private:
 			vis_array_.markers.push_back(vis_marker);
 
 			for (unsigned int i = 0; i < ids.size(); i++)
-				pushVisMarkers(msg->header.frame_id, msg->header.stamp, array_.markers[i].pose.pose,
+				pushVisMarkers(msg->header.frame_id, msg->header.stamp, array_.markers[i].pose,
 				               getMarkerLength(ids[i]), ids[i], i);
 
 			vis_markers_pub_.publish(vis_array_);

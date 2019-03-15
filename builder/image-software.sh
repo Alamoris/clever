@@ -121,8 +121,10 @@ pip --version
 pip3 --version
 
 echo_stamp "Install and enable Butterfly (web terminal)"
-my_travis_retry pip3 install --prefer-binary butterfly
-my_travis_retry pip3 install --prefer-binary butterfly[systemd]
+echo_stamp "Workaround for tornado >= 6.0 breaking butterfly"
+my_travis_retry pip3 install tornado==5.1.1
+my_travis_retry pip3 install butterfly
+my_travis_retry pip3 install butterfly[systemd]
 systemctl enable butterfly.socket
 
 echo_stamp "Install ws281x library"
@@ -139,6 +141,7 @@ wget https://nodejs.org/dist/v10.15.0/node-v10.15.0-linux-armv6l.tar.gz
 tar -xzf node-v10.15.0-linux-armv6l.tar.gz
 cp -R node-v10.15.0-linux-armv6l/* /usr/local/
 rm -rf node-v10.15.0-linux-armv6l/
+rm node-v10.15.0-linux-armv6l.tar.gz
 
 echo_stamp "Add .vimrc"
 cat << EOF > /home/pi/.vimrc
@@ -150,7 +153,7 @@ EOF
 echo_stamp "Attempting to kill dirmngr"
 gpgconf --kill dirmngr
 # dirmngr is only used by apt-key, so we can safely kill it.
-# We ignore killall's exit value as well.
-killall -w -9 dirmngr || true
+# We ignore pkill's exit value as well.
+pkill -9 -f dirmngr || true
 
 echo_stamp "End of software installation"

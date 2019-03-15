@@ -28,6 +28,9 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/exact_time.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <sensor_msgs/Image.h>
@@ -42,16 +45,24 @@
 
 #include "draw.h"
 #include "utils.h"
-#include "gridboard.h"
 
 using std::vector;
 using cv::Mat;
+using sensor_msgs::Image;
+using sensor_msgs::CameraInfo;
+using aruco_pose::MarkerArray;
+
+typedef message_filters::sync_policies::ExactTime<Image, CameraInfo, MarkerArray> SyncPolicy;
 
 class ArucoMap : public nodelet::Nodelet {
 private:
 	ros::NodeHandle nh_, nh_priv_;
 	ros::Publisher img_pub_, pose_pub_, vis_markers_pub_;
-	ros::Subscriber markers_sub_, cinfo_sub;
+	image_transport::Publisher debug_pub_;
+	message_filters::Subscriber<Image> image_sub_;
+	message_filters::Subscriber<CameraInfo> info_sub_;
+	message_filters::Subscriber<MarkerArray> markers_sub_;
+	boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
 	cv::Ptr<cv::aruco::Board> board_;
 	Mat camera_matrix_, dist_coeffs_;
 	geometry_msgs::TransformStamped transform_;
@@ -60,9 +71,8 @@ private:
 	tf2_ros::Buffer tf_buffer_;
 	tf2_ros::TransformListener tf_listener_{tf_buffer_};
 	visualization_msgs::MarkerArray vis_array_;
-	std::string known_orientation_;
+	std::string known_tilt_;
 	int image_width_, image_height_, image_margin_;
-	bool has_camera_info_ = false;
 
 public:
 	virtual void onInit()
@@ -81,16 +91,15 @@ public:
 		camera_matrix_ = cv::Mat::zeros(3, 3, CV_64F);
 		dist_coeffs_ = cv::Mat::zeros(8, 1, CV_64F);
 
-		std::string type, map, map_name;
+		std::string type, map;
 		nh_priv_.param<std::string>("type", type, "map");
-		nh_priv_.param<std::string>("name", map_name, "map");
 		nh_priv_.param<std::string>("frame_id", transform_.child_frame_id, "aruco_map");
-		nh_priv_.param<std::string>("known_orientation", known_orientation_, "");
+		nh_priv_.param<std::string>("known_tilt", known_tilt_, "");
 		nh_priv_.param("image_width", image_width_, 2000);
 		nh_priv_.param("image_height", image_height_, 2000);
 		nh_priv_.param("image_margin", image_margin_, 200);
 
-		createStripLine();
+		// createStripLine();
 
 		if (type == "map") {
 			param(nh_priv_, "map", map);
@@ -104,10 +113,14 @@ public:
 
 		pose_pub_ = nh_priv_.advertise<geometry_msgs::PoseWithCovarianceStamped>("pose", 1);
 		vis_markers_pub_ = nh_priv_.advertise<visualization_msgs::MarkerArray>("visualization", 1, true);
+		debug_pub_ = it_priv.advertise("debug", 1);
 
-		// TODO: use synchronised subscriber
-		markers_sub_ = nh_.subscribe("markers", 1, &ArucoMap::markersCallback, this);
-		cinfo_sub = nh_.subscribe("camera_info", 1, &ArucoMap::cinfoCallback, this);
+		image_sub_.subscribe(nh_, "image_raw", 1);
+		info_sub_.subscribe(nh_, "camera_info", 1);
+		markers_sub_.subscribe(nh_, "markers", 1);
+
+		sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), image_sub_, info_sub_, markers_sub_));
+		sync_->registerCallback(boost::bind(&ArucoMap::callback, this, _1, _2, _3));
 
 		publishMapImage();
 		vis_markers_pub_.publish(vis_array_);
@@ -115,18 +128,23 @@ public:
 		ROS_INFO("aruco_map: ready");
 	}
 
-	void markersCallback(const aruco_pose::MarkerArray& markers)
+	void callback(const sensor_msgs::ImageConstPtr& image,
+	              const sensor_msgs::CameraInfoConstPtr& cinfo,
+	              const aruco_pose::MarkerArrayConstPtr& markers)
 	{
-		if (!has_camera_info_) return;
-		if (markers.markers.empty()) return;
-
-		int count = markers.markers.size();
+		int valid = 0;
+		int count = markers->markers.size();
 		std::vector<int> ids;
 		std::vector<std::vector<cv::Point2f>> corners;
+		cv::Vec3d rvec, tvec;
+
+		parseCameraInfo(cinfo, camera_matrix_, dist_coeffs_);
+		if (markers->markers.empty()) goto publish_debug;
+
 		ids.reserve(count);
 		corners.reserve(count);
 
-		for(auto const &marker : markers.markers) {
+		for(auto const &marker : markers->markers) {
 			ids.push_back(marker.id);
 			std::vector<cv::Point2f> marker_corners = {
 				cv::Point2f(marker.c1.x, marker.c1.y),
@@ -137,36 +155,34 @@ public:
 			corners.push_back(marker_corners);
 		}
 
-		Mat obj_points, img_points;
-		cv::Vec3d rvec, tvec;
-
-		if (known_orientation_.empty()) {
+		if (known_tilt_.empty()) {
 			// simple estimation
-			int valid = cv::aruco::estimatePoseBoard(corners, ids, board_, camera_matrix_, dist_coeffs_,
-		                                             rvec, tvec, false);
-			if (!valid) return;
+			valid = cv::aruco::estimatePoseBoard(corners, ids, board_, camera_matrix_, dist_coeffs_,
+			                                     rvec, tvec, false);
+			if (!valid) goto publish_debug;
 
-			transform_.header.stamp = markers.header.stamp;
-			transform_.header.frame_id = markers.header.frame_id;
+			transform_.header.stamp = markers->header.stamp;
+			transform_.header.frame_id = markers->header.frame_id;
 			pose_.header = transform_.header;
 			fillPose(pose_.pose.pose, rvec, tvec);
 			fillTransform(transform_.transform, rvec, tvec);
 
 		} else {
+			Mat obj_points, img_points;
 			// estimation with "snapping"
 			cv::aruco::getBoardObjectAndImagePoints(board_, corners, ids, obj_points, img_points);
-			if (obj_points.empty()) return;
+			if (obj_points.empty()) goto publish_debug;
 
-			double center_x = 0, center_y = 0;
-			alignObjPointsToCenter(obj_points, center_x, center_y);
+			double center_x = 0, center_y = 0, center_z = 0;
+			alignObjPointsToCenter(obj_points, center_x, center_y, center_z);
 
-			int res = solvePnP(obj_points, img_points, camera_matrix_, dist_coeffs_, rvec, tvec, false);
-			if (!res) return;
+			valid = solvePnP(obj_points, img_points, camera_matrix_, dist_coeffs_, rvec, tvec, false);
+			if (!valid) goto publish_debug;
 
 			fillTransform(transform_.transform, rvec, tvec);
 			try {
-				geometry_msgs::TransformStamped snap_to = tf_buffer_.lookupTransform(markers.header.frame_id,
-				                                          known_orientation_, markers.header.stamp, ros::Duration(0.02));
+				geometry_msgs::TransformStamped snap_to = tf_buffer_.lookupTransform(markers->header.frame_id,
+				                                          known_tilt_, markers->header.stamp, ros::Duration(0.02));
 				snapOrientation(transform_.transform.rotation, snap_to.transform.rotation);
 			} catch (const tf2::TransformException& e) {
 				ROS_WARN_THROTTLE(1, "aruco_map: can't snap: %s", e.what());
@@ -175,11 +191,17 @@ public:
 			geometry_msgs::TransformStamped shift;
 			shift.transform.translation.x = -center_x;
 			shift.transform.translation.y = -center_y;
+			shift.transform.translation.z = -center_z;
 			shift.transform.rotation.w = 1;
 			tf2::doTransform(shift, transform_, transform_);
 
-			transform_.header.stamp = markers.header.stamp;
-			transform_.header.frame_id = markers.header.frame_id;
+			// for debug topic
+			tvec[0] = transform_.transform.translation.x;
+			tvec[1] = transform_.transform.translation.y;
+			tvec[2] = transform_.transform.translation.z;
+
+			transform_.header.stamp = markers->header.stamp;
+			transform_.header.frame_id = markers->header.frame_id;
 			pose_.header = transform_.header;
 			transformToPose(transform_.transform, pose_.pose.pose);
 		}
@@ -188,31 +210,45 @@ public:
 			br_.sendTransform(transform_);
 		}
 		pose_pub_.publish(pose_);
+
+publish_debug:
+		// publish debug image (even if no map detected)
+		if (debug_pub_.getNumSubscribers() > 0) {
+			Mat mat = cv_bridge::toCvCopy(image, "bgr8")->image; // copy image as we're planning to modify it
+			cv::aruco::drawDetectedMarkers(mat, corners, ids); // draw detected markers
+			if (valid) {
+				cv::aruco::drawAxis(mat, camera_matrix_, dist_coeffs_, rvec, tvec, 1.0); // draw board axis
+			}
+			cv_bridge::CvImage out_msg;
+			out_msg.header.frame_id = image->header.frame_id;
+			out_msg.header.stamp = image->header.stamp;
+			out_msg.encoding = sensor_msgs::image_encodings::BGR8;
+			out_msg.image = mat;
+			debug_pub_.publish(out_msg.toImageMsg());
+		}
 	}
 
-	void cinfoCallback(const sensor_msgs::CameraInfoConstPtr& cinfo)
-	{
-		parseCameraInfo(cinfo, camera_matrix_, dist_coeffs_);
-		has_camera_info_ = true;
-	}
-
-	void alignObjPointsToCenter(Mat &obj_points, double &center_x, double &center_y) const
+	void alignObjPointsToCenter(Mat &obj_points, double &center_x, double &center_y, double &center_z) const
 	{
 		// Align object points to the center of mass
 		double sum_x = 0;
 		double sum_y = 0;
+		double sum_z = 0;
 
-		for (int i = 0; i < obj_points.rows; i++) 		{
+		for (int i = 0; i < obj_points.rows; i++) {
 			sum_x += obj_points.at<float>(i, 0);
 			sum_y += obj_points.at<float>(i, 1);
+			sum_z += obj_points.at<float>(i, 2);
 		}
 
 		center_x = sum_x / obj_points.rows;
 		center_y = sum_y / obj_points.rows;
+		center_z = sum_z / obj_points.rows;
 
-		for (int i = 0; i < obj_points.rows; i++) 		{
+		for (int i = 0; i < obj_points.rows; i++) {
 			obj_points.at<float>(i, 0) -= center_x;
 			obj_points.at<float>(i, 1) -= center_y;
+			obj_points.at<float>(i, 2) -= center_z;
 		}
 	}
 
@@ -272,23 +308,31 @@ public:
 			}
 		}
 
-		createCustomGridBoard(board_, markers_x, markers_y, markers_side, markers_sep_x, markers_sep_y, marker_ids);
+		double max_y = markers_y * markers_side + (markers_y - 1) * markers_sep_y;
+		for(int y = 0; y < markers_y; y++) {
+			for(int x = 0; x < markers_x; x++) {
+				double x_pos = x * (markers_side + markers_sep_x);
+				double y_pos = max_y - y * (markers_side + markers_sep_y) - markers_side;
+				ROS_INFO("add marker %d %g %g", marker_ids[y * markers_y + x], x_pos, y_pos);
+				addMarker(marker_ids[y * markers_y + x], markers_side, x_pos, y_pos, 0, 0, 0, 0);
+			}
+		}
 	}
 
-	void createStripLine()
-	{
-		visualization_msgs::Marker marker;
-		marker.header.frame_id = transform_.child_frame_id;
-		marker.action = visualization_msgs::Marker::ADD;
-		marker.ns = "aruco_map_link";
-		marker.type = visualization_msgs::Marker::LINE_STRIP;
-		marker.scale.x = 0.02;
-		marker.color.g = 1;
-		marker.color.a = 0.8;
-		marker.frame_locked = true;
-		marker.pose.orientation.w = 1;
-		vis_array_.markers.push_back(marker);
-	}
+	// void createStripLine()
+	// {
+	// 	visualization_msgs::Marker marker;
+	// 	marker.header.frame_id = transform_.child_frame_id;
+	// 	marker.action = visualization_msgs::Marker::ADD;
+	// 	marker.ns = "aruco_map_link";
+	// 	marker.type = visualization_msgs::Marker::LINE_STRIP;
+	// 	marker.scale.x = 0.02;
+	// 	marker.color.g = 1;
+	// 	marker.color.a = 0.8;
+	// 	marker.frame_locked = true;
+	// 	marker.pose.orientation.w = 1;
+	// 	vis_array_.markers.push_back(marker);
+	// }
 
 	void addMarker(int id, double length, double x, double y, double z,
 				   double yaw, double pitch, double roll)
@@ -345,21 +389,28 @@ public:
 		vis_array_.markers.push_back(marker);
 
 		// Add linking line
-		geometry_msgs::Point p;
-		p.x = x;
-		p.y = y;
-		p.z = z;
-		vis_array_.markers.at(0).points.push_back(p);
+		// geometry_msgs::Point p;
+		// p.x = x;
+		// p.y = y;
+		// p.z = z;
+		// vis_array_.markers.at(0).points.push_back(p);
 	}
 
 	void publishMapImage()
 	{
+		cv::Size size(image_width_, image_height_);
 		cv::Mat image;
 		cv_bridge::CvImage msg;
-		drawPlanarBoard(board_, cv::Size(image_width_, image_height_), image, image_margin_, 1);
 
-		cv::cvtColor(image, image, CV_GRAY2BGR);
-		msg.encoding = sensor_msgs::image_encodings::BGR8;
+		if (!board_->ids.empty()) {
+			_drawPlanarBoard(board_, size, image, image_margin_, 1);
+		} else {
+			// empty map
+			image.create(size, CV_8UC1);
+			image.setTo(cv::Scalar::all(255));
+		}
+
+		msg.encoding = sensor_msgs::image_encodings::MONO8;
 		msg.image = image;
 		img_pub_.publish(msg.toImageMsg());
 	}

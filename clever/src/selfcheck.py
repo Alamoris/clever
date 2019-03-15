@@ -43,7 +43,7 @@ def check(name):
                     rospy.logwarn('%s: %s', name, f)
             except Exception as e:
                 traceback.print_exc()
-                rospy.logwarn('%s: exception occured', name)
+                rospy.logwarn('%s: exception occurred', name)
                 return
             if not failures:
                 rospy.loginfo('%s: OK', name)
@@ -80,12 +80,17 @@ def check_camera(name):
         failure('%s: calibration height doesn\'t match image height (%d != %d))', name, info.height, img.height)
 
 
-@check('Aruco detector')
+@check('ArUco detector')
 def check_aruco():
     try:
-        rospy.wait_for_message('aruco_pose/debug', Image, timeout=1)
+        rospy.wait_for_message('aruco_detect/markers', MarkerArray, timeout=1)
     except rospy.ROSException:
-        failure('no aruco_pose/debug messages')
+        failure('no markers detection')
+        return
+    try:
+        rospy.wait_for_message('aruco_map/pose', PoseWithCovarianceStamped, timeout=1)
+    except rospy.ROSException:
+        failure('no map detection')
 
 
 @check('Vision position estimate')
@@ -203,11 +208,11 @@ def check_optical_flow():
 def check_rangefinder():
     # TODO: check FPS!
     try:
-        rospy.wait_for_message('mavros/distance_sensor/rangefinder_3_sub', Range, timeout=0.5)
+        rospy.wait_for_message('mavros/distance_sensor/rangefinder_sub', Range, timeout=0.5)
     except rospy.ROSException:
         failure('no randefinder data from Raspberry')
     try:
-        rospy.wait_for_message('mavros/distance_sensor/rangefinder_0', Range, timeout=0.5)
+        rospy.wait_for_message('mavros/distance_sensor/rangefinder', Range, timeout=0.5)
     except rospy.ROSException:
         failure('no rangefinder data from PX4')
 

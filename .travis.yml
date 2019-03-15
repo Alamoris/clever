@@ -4,16 +4,17 @@ services:
   - docker
 env:
   global:
-    - DOCKER="okalachev/img-tool:latest"
+    - DOCKER="sfalexrog/img-tool:qemu-update"
     - TARGET_REPO="https://github.com/${TRAVIS_REPO_SLUG}.git"
     - if [[ -z ${TRAVIS_TAG} ]]; then IMAGE_VERSION="${TRAVIS_COMMIT}}"; else IMAGE_VERSION="${TRAVIS_TAG}"; fi
     - IMAGE_NAME="$(basename -s '.git' ${TARGET_REPO})_${IMAGE_VERSION}.img"
 git:
-  depth: 1
-matrix:
+  depth: 50
+jobs:
   fast_finish: true
   include:
-    - name: "Raspberry Pi Image Build"
+    - stage: Build
+      name: "Raspberry Pi Image Build"
       cache:
         directories:
         - imgcache
@@ -39,7 +40,9 @@ matrix:
         on:
           tags: true
         draft: true
-    - name: "Documentation"
+        name: ${TRAVIS_TAG}
+    - stage: Build
+      name: "Documentation"
       language: node_js
       node_js:
         - "10"
@@ -65,7 +68,17 @@ matrix:
 #        target-branch: gh-pages
 #        on:
 #          branch: WIP/gitbook-autobuild
-
+    - stage: Annotate
+      name: Auto-generate changelog
+      language: python
+      python: 3.6
+      install:
+        - pip install GitPython PyGithub
+      script:
+        - PYTHONUNBUFFERED=1 python ./gen_changelog.py
+stages:
+  - Build
+  - Annotate
 # More info there
 # https://github.com/travis-ci/travis-ci/issues/6893
 # https://docs.travis-ci.com/user/customizing-the-build/
