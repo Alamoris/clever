@@ -4,18 +4,7 @@
 
 ## Включение
 
-> **Note** Для использования Optical Flow необходима <a id="download-firmware" href="https://github.com/CopterExpress/Firmware/releases">кастомная прошивка PX4</a>. Подробнее про прошивку см. [соответствующую статью](firmware.md).
-
-<script type="text/javascript">
-    fetch('https://api.github.com/repos/CopterExpress/Firmware/releases').then(res => res.json()).then(function(data) {
-        for (let release of data) {
-            if (!release.prerelease && !release.draft && release.tag_name.includes('-clever.')) {
-                document.querySelector('#download-firmware').href = release.html_url;
-                return;
-            }
-        }
-    });
-</script>
+> **Hint** Рекомендуется использование [специальной сборки PX4 для Клевера](firmware.md#прошивка-для-клевера).
 
 Необходимо использование дальномера. [Подключите и настройте дальномер VL53L1X](laser.md), используя инструкцию.
 
@@ -54,6 +43,8 @@ Optical Flow публикует данные в топик `mavros/px4flow/raw/s
 * `SENS_FLOW_MAXHGT` – 4.0 (для дальномера VL53L1X)
 * `SENS_FLOW_MINHGT` – 0.01 (для дальномера VL53L1X)
 * Опционально: `LPE_FUSION` – включен флажок pub agl as lpos down (см. [конфигурирование дальномера](laser.md).
+
+Для проверки правильности всех настроек можно [воспользоваться утилитой `selfcheck.py`](selfcheck.md).
 
 ## Полет в POSCTL
 
@@ -97,6 +88,8 @@ navigate(x=1.5, frame_id='body')
 * повысить значение коэффициента `MPC_Z_VEL_P`;
 * изменить значение параметра `MPC_THR_HOVER`;
 * выставить `MPC_ALT_MODE` = 2 (Terrain following).
+
+При использовании Optical Flow максимальная горизонтальная скорость дополнительно ограничивается. За это косвенно отвечает параметр `SENS_FLOW_MAXR` (максимальная достоверная "угловая скорость" оптического потока). При нормальном полёте горизонтальная скорость будет регулироваться так, чтобы показания Optical Flow не превышали 50% значения данного параметра.
 
 ## Неисправности
 

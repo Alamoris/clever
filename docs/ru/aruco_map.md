@@ -2,6 +2,10 @@
 
 > **Info** Для распознавания маркеров модуль камеры должен быть корректно подключен и [сконфигурирован](camera.md).
 
+<!-- -->
+
+> **Hint** Рекомендуется использование [специальной сборки PX4 для Клевера](firmware.md#прошивка-для-клевера).
+
 Модуль `aruco_map` распознает карты ArUco-маркеров, как единое целое. Также возможна навигация по картам ArUco-маркеров с использованием механизма Vision Position Estimate (VPE).
 
 ## Конфигурирование
@@ -86,13 +90,17 @@ rosrun aruco_pose genmap.py 0.33 2 4 1 1 0 > ~/catkin_ws/src/clever/aruco_pose/m
 
 При использовании **LPE** (параметр `SYS_MC_EST_GROUP` = `local_position_estimator, attitude_estimator_q`):
 
-* В параметре `LPE_FUSION` включены флажки `vision position`, `land detector`.
+* В параметре `LPE_FUSION` включены флажки `vision position`, `land detector`. Флажок `baro` рекомендуется отключить.
 * Вес угла по рысканью по зрению: `ATT_W_EXT_HDG` = 0.5
 * Включена ориентация по Yaw по зрению: `ATT_EXT_HDG_M` = 1 `Vision`.
 * Шумы позиции по зрению: `LPE_VIS_XY` = 0.1 m, `LPE_VIS_Z` = 0.1 m.
 * `LPE_VIS_DELAY` = 0 sec
 
 <!-- * Выключен компас: `ATT_W_MAG` = 0 -->
+
+> **Hint** На данный момент для полета по маркерам рекомендуется использование **LPE**.
+
+Для проверки правильности всех настроек можно [воспользоваться утилитой `selfcheck.py`](selfcheck.md).
 
 > **Info** Для использования LPE в Pixhawk необходимо [скачать прошивку с названием `px4fmu-v2_lpe.px4`](https://github.com/PX4/Firmware/releases).
 
@@ -126,7 +134,7 @@ navigate(2, 2, 2, speed=1, frame_id='aruco_map')  # полет в координ
 
 Для навигации по маркерам, расположенным на потолке, необходимо поставить основную камеру так, чтобы она смотрела вверх и [установить соответствующий фрейм камеры](camera_frame.md).
 
-Также в файле `~/catkin_ws/src/clever/clever/launch/aruco.launch` необходимо установить параметр `known_tilt` в секции `aruco_map` в значение `map_flipped`:
+Также в файле `~/catkin_ws/src/clever/clever/launch/aruco.launch` необходимо установить параметр `known_tilt` в секциях `aruco_detect` и `aruco_map` в значение `map_flipped`:
 
 ```xml
 <param name="known_tilt" value="map_flipped"/>

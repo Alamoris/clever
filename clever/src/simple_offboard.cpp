@@ -70,6 +70,7 @@ ros::Duration global_position_timeout;
 ros::Duration battery_timeout;
 float default_speed;
 bool auto_release;
+bool land_only_in_offboard;
 std::map<string, string> reference_frames;
 
 // Publishers
@@ -528,12 +529,13 @@ bool serve(enum setpoint_type_t sp_type, float x, float y, float z, float vx, fl
 			nav_speed = speed;
 		}
 
-		if (sp_type == NAVIGATE || sp_type == NAVIGATE_GLOBAL || sp_type == POSITION || sp_type == VELOCITY) {
-			if (std::isnan(yaw) && yaw_rate == 0) {
-				// keep yaw unchanged
-				yaw = tf2::getYaw(local_position.pose.orientation);
-			}
-		}
+		// if (sp_type == NAVIGATE || sp_type == NAVIGATE_GLOBAL || sp_type == POSITION || sp_type == VELOCITY) {
+		// 	if (std::isnan(yaw) && yaw_rate == 0) {
+		// 		// keep yaw unchanged
+		//		// TODO: this is incorrect, because we need yaw in desired frame
+		// 		yaw = tf2::getYaw(local_position.pose.orientation);
+		// 	}
+		// }
 
 		if (sp_type == POSITION || sp_type == NAVIGATE || sp_type == NAVIGATE_GLOBAL || sp_type == VELOCITY || sp_type == ATTITUDE) {
 			// destination point and/or yaw
@@ -643,6 +645,12 @@ bool land(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
 
 		checkState();
 
+		if (land_only_in_offboard) {
+			if (state.mode != "OFFBOARD") {
+				throw std::runtime_error("Copter is not in OFFBOARD mode");
+			}
+		}
+
 		static mavros_msgs::SetMode sm;
 		sm.request.custom_mode = "AUTO.LAND";
 
@@ -687,6 +695,7 @@ int main(int argc, char **argv)
 	nh.param<string>("mavros/local_position/tf/child_frame_id", fcu_frame, "base_link");
 	nh_priv.param("target_frame", target.child_frame_id, string("navigate_target"));
 	nh_priv.param("auto_release", auto_release, true);
+	nh_priv.param("land_only_in_offboard", land_only_in_offboard, true);
 	nh_priv.param("default_speed", default_speed, 0.5f);
 	nh_priv.getParam("reference_frames", reference_frames);
 
