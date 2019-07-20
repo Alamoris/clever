@@ -162,8 +162,6 @@ add_executable(rc src/rc.cpp)
 
 add_executable(camera_markers src/camera_markers.cpp)
 
-add_executable(frames src/frames.cpp)
-
 add_executable(vpe_publisher src/vpe_publisher.cpp)
 
 target_link_libraries(simple_offboard
@@ -174,8 +172,6 @@ target_link_libraries(simple_offboard
 target_link_libraries(rc ${catkin_LIBRARIES})
 
 target_link_libraries(camera_markers ${catkin_LIBRARIES})
-
-target_link_libraries(frames ${catkin_LIBRARIES})
 
 target_link_libraries(vpe_publisher ${catkin_LIBRARIES})
 
@@ -243,3 +239,8 @@ target_link_libraries(clever
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/basic.test)
+endif()

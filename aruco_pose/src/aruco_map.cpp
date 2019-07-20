@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
 #include <pluginlib/class_list_macros.h>
@@ -27,6 +28,7 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -36,7 +38,6 @@
 #include <sensor_msgs/Image.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <algorithm>
 
 #include <aruco_pose/MarkerArray.h>
 #include <aruco_pose/Marker.h>
@@ -68,11 +69,13 @@ private:
 	Mat camera_matrix_, dist_coeffs_;
 	geometry_msgs::TransformStamped transform_;
 	geometry_msgs::PoseWithCovarianceStamped pose_;
+	vector<geometry_msgs::TransformStamped> markers_transforms_;
 	tf2_ros::TransformBroadcaster br_;
+	tf2_ros::StaticTransformBroadcaster static_br_;
 	tf2_ros::Buffer tf_buffer_;
 	tf2_ros::TransformListener tf_listener_{tf_buffer_};
 	visualization_msgs::MarkerArray vis_array_;
-	std::string known_tilt_;
+	std::string known_tilt_, map_, markers_frame_, markers_parent_frame_;
 	int image_width_, image_height_, image_margin_;
 	bool auto_flip_;
 
@@ -101,6 +104,8 @@ public:
 		nh_priv_.param("image_width", image_width_, 2000);
 		nh_priv_.param("image_height", image_height_, 2000);
 		nh_priv_.param("image_margin", image_margin_, 200);
+		nh_priv_.param<std::string>("markers/frame_id", markers_parent_frame_, transform_.child_frame_id);
+		nh_priv_.param<std::string>("markers/child_frame_id_prefix", markers_frame_, "");
 
 		// createStripLine();
 
@@ -125,6 +130,7 @@ public:
 		sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), image_sub_, info_sub_, markers_sub_));
 		sync_->registerCallback(boost::bind(&ArucoMap::callback, this, _1, _2, _3));
 
+		publishMarkersFrames();
 		publishMapImage();
 		vis_markers_pub_.publish(vis_array_);
 
@@ -422,6 +428,15 @@ publish_debug:
 		board_->ids.push_back(id);
 		board_->objPoints.push_back(obj_points);
 
+		// Add marker's static transform
+		if (!markers_frame_.empty()) {
+			geometry_msgs::TransformStamped marker_transform;
+			marker_transform.header.frame_id = markers_parent_frame_;
+			marker_transform.child_frame_id = markers_frame_ + std::to_string(id);
+			tf::transformTFToMsg(transform, marker_transform.transform);
+			markers_transforms_.push_back(marker_transform);
+		}
+
 		// Add visualization marker
 		visualization_msgs::Marker marker;
 		marker.header.frame_id = transform_.child_frame_id;
@@ -450,6 +465,13 @@ publish_debug:
 		// p.y = y;
 		// p.z = z;
 		// vis_array_.markers.at(0).points.push_back(p);
+	}
+
+	void publishMarkersFrames()
+	{
+		if (!markers_transforms_.empty()) {
+			static_br_.sendTransform(markers_transforms_);
+		}
 	}
 
 	void publishMapImage()

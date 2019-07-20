@@ -17,6 +17,7 @@
 * Настройка
   * [Первоначальная настройка](setup.md)
   * [Полетные режимы](modes.md)
+  * [Настройка режима тренера](trainer_mode.md)
   * [Прошивка полетного контролера](firmware.md)
   * [Параметры PX4](px4_parameters.md)
   * [Настройка PID](calibratePID.md)
@@ -57,6 +58,7 @@
   * [3G-модем](3g.md)
   * [Установка ROS Kinetic](ros-install.md)
 * Проекты на базе Клевера
+  * [Генератор ArUco карт](arucogenmap.md)
   * [Шаровая защита коптера](shield.md)
   * [Распознавание лиц](face_recognition.md)
   * [Подсчет количества объектов c камеры](object_counting.md)

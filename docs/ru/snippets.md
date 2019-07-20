@@ -83,6 +83,52 @@ while True:
     rospy.sleep(0.2)
 ```
 
+Вышеприведенный код может быть обернут в функцию:
+
+```python
+def navigate_wait(x, y, z, speed, frame_id, tolerance=0.2):
+    navigate(x=x, y=y, z=z, speed=speed, frame_id=frame_id)
+
+    while True:
+        telem = get_telemetry(frame_id=frame_id)
+        if get_distance(x, y, z, telem.x, telem.y, telem.z) < tolerance:
+            break
+        rospy.sleep(0.2)
+```
+
+Более универсальная функция с использованием фрейма `navigate_target`, который совпадает с целевой точкой навигации дрона:
+
+```python
+def navigate_wait(x, y, z, speed, frame_id, tolerance=0.2):
+    navigate(x=x, y=y, z=z, speed=speed, frame_id=frame_id)
+
+    while True:
+        telem = get_telemetry(frame_id='navigate_target')
+        if math.sqrt(telem.x ** 2 + telem.y ** 2 + telem.z ** 2) < tolerance:
+            break
+```
+
+Такой код может быть использован для полета в том числе с использованием фрейма `body`.
+
+### # {#block-land}
+
+Посадка и ожидание окончания посадки:
+
+```python
+land()
+while get_telemetry().armed:
+    rospy.sleep(0.2)
+```
+
+Вышеприведенный код может быть обернут в функцию:
+
+```python
+def land_wait():
+    land()
+    while get_telemetry().armed:
+        rospy.sleep(0.2)
+```
+
 ### # {#disarm}
 
 Дизарм коптера (выключение винтов, **коптер упадет**):
@@ -285,13 +331,17 @@ set_mode(custom_mode='STABILIZED')
 Флип по крену:
 
 ```python
+import math
+
+# ...
+
 def flip():
     start = get_telemetry()  # memorize starting position
 
     set_rates(thrust=1)  # bump up
     rospy.sleep(0.2)
 
-    set_rates(roll_rate=20, thrust=0.2)  # maximum roll rate
+    set_rates(roll_rate=30, thrust=0.2)  # maximum roll rate
 
     while True:
         telem = get_telemetry()
@@ -302,7 +352,7 @@ def flip():
     rospy.loginfo('finish flip')
     set_position(x=start.x, y=start.y, z=start.z, yaw=start.yaw)  # finish flip
 
-print navigate(z=4, speed=1, auto_arm=True)  # take off
+print navigate(z=2, speed=1, frame_id='body', auto_arm=True)  # take off
 rospy.sleep(10)
 
 rospy.loginfo('flip')

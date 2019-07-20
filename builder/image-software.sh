@@ -63,7 +63,7 @@ echo_stamp "Install apt keys & repos"
 curl http://repo.coex.space/aptly_repo_signing.key 2> /dev/null | apt-key add -
 apt-get update \
 && apt-get install --no-install-recommends -y -qq dirmngr=2.1.18-8~deb9u4 > /dev/null \
-&& apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+&& apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
 
 echo "deb http://packages.ros.org/ros/ubuntu stretch main" > /etc/apt/sources.list.d/ros-latest.list
 echo "deb http://repo.coex.space/rpi-ros-kinetic stretch main" > /etc/apt/sources.list.d/rpi-ros-kinetic.list
@@ -88,7 +88,7 @@ lsof=4.89+dfsg-0.1 \
 git \
 dnsmasq=2.76-5+rpt1+deb9u1  \
 tmux=2.3-4 \
-vim=2:8.0.0197-4+deb9u1 \
+vim \
 cmake=3.7.2-1 \
 libjpeg8=8d1-2 \
 tcpdump \
@@ -108,16 +108,17 @@ ntpdate \
 python-dev \
 python3-dev \
 python-systemd \
+mjpg-streamer=2.0 \
 && echo_stamp "Everything was installed!" "SUCCESS" \
 || (echo_stamp "Some packages wasn't installed!" "ERROR"; exit 1)
 
 echo_stamp "Updating kernel to fix camera bug"
 apt-get install --no-install-recommends -y \
-	raspberrypi-kernel=1.20190517-1 \
-	raspberrypi-bootloader=1.20190517-1 \
-	libraspberrypi-bin=1.20190517-1 \
-	libraspberrypi-dev=1.20190517-1 \
-	libraspberrypi0=1.20190517-1 \
+	raspberrypi-kernel=1.20190709~stretch-1 \
+	raspberrypi-bootloader=1.20190709~stretch-1 \
+	libraspberrypi-bin=1.20190709~stretch-1 \
+	libraspberrypi-dev=1.20190709~stretch-1 \
+	libraspberrypi0=1.20190709~stretch-1 \
 	wireless-regdb=2018.05.09-0~rpt1 \
 	wpasupplicant=2:2.6-21~bpo9~rpt1
 
