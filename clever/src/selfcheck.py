@@ -606,10 +606,16 @@ def check_cpu_usage():
 
 @check('clever.service')
 def check_clever_service():
-    output = subprocess.check_output('systemctl show -p ActiveState --value clever.service'.split())
+    try:
+        output = subprocess.check_output('systemctl show -p ActiveState --value clever.service'.split(),
+                                         stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        failure('systemctl returned %s: %s', e.returncode, e.output)
+        return
     if 'inactive' in output:
         failure('clever.service is not running, try sudo systemctl restart clever')
         return
+
     j = journal.Reader()
     j.this_boot()
     j.add_match(_SYSTEMD_UNIT='clever.service')
@@ -632,7 +638,10 @@ def check_clever_service():
 
 @check('Image')
 def check_image():
-    info('version: %s', open('/etc/clever_version').read().strip())
+    try:
+        info('version: %s', open('/etc/clever_version').read().strip())
+    except IOError:
+        info('no /etc/clever_version file, not the Clever image?')
 
 
 @check('Preflight status')
@@ -641,7 +650,7 @@ def check_preflight_status():
     mavlink_exec('\n')
     cmdr_output = mavlink_exec('commander check')
     if cmdr_output == '':
-        failure('No data from FCU')
+        failure('no data from FCU')
         return
     cmdr_lines = cmdr_output.split('\n')
     r = re.compile(r'^(.*)(Preflight|Prearm) check: (.*)')
