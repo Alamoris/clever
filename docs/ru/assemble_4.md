@@ -143,7 +143,7 @@
 
     <img src="../assets/assembling_clev4/raspberry_9.png" width=300 class="zoom border center">
 
-10. Подключите к *Raspberri Pi* дальномер и кабель питания.
+10. Подключите к *Raspberry Pi* дальномер и кабель питания.
 
     <img src="../assets/assembling_clev4/raspberry_10.png" width=300 class="zoom border center">
 
