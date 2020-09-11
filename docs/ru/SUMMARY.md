@@ -4,7 +4,8 @@
 * [Глоссарий](gloss.md)
 * [Безопасность](safety.md)
 * Сборка
-  * [Клевер 4.2](assemble_4_2.md)
+  * [Клевер 4.2 беспаечный](assemble_4_2.md)
+  * [Клевер 4.2 паечный](assemble_soldering_4_2.md)
   * [Клевер 4.1](assemble_4_1.md)
   * [Клевер 4](assemble_4.md)
   * [Клевер 3](assemble_3.md)
@@ -59,6 +60,9 @@
 * Дополнительные материалы
   * [COEX Pix](coex_pix.md)
   * [Гид по автономному полету](auto_setup.md)
+  * [Механический захват](mechanical_grip.md)
+  * [Магнитный захват](magnetic_grip.md)
+  * [Установка FPV v4.2](fpv_install.md)
   * [Имя хоста](hostname.md)
   * [Симулятор](sitl.md)
   * [Настройка PID](pid_tuning.md)
