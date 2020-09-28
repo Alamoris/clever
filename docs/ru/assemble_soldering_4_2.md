@@ -54,29 +54,29 @@
 1. Совместите 4 луча с центральной декой, зафиксируйте их при помощи винтов М3х8 и гаек с нейлоновой вставкой.
 
     <div class="image-group">
-        <img src="../assets/assembling_clever4_2/frame_1.png" width=300 class="zoom border">
-        <img src="../assets/assembling_clever4_2/frame_2.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/frame_1.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/frame_2.png" width=300 class="zoom border">
     </div>
 
 2. На центральные отверстия в главной деке установите 2 стойки 15мм и закрепите их с помощью винтов М3х8.
 
-    <img src="../assets/assembling_clever4_2/frame_3.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/frame_3.png" width=300 class="zoom border center">
 
 3. Установите крючок пластины жесткости в паз на луче.
 
-    <img src="../assets/assembling_clever4_2/frame_4.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/frame_4.png" width=300 class="zoom border center">
 
 4. Прижмите пластины жесткости к главной деке.
 
-    <img src="../assets/assembling_clever4_2/frame_5.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/frame_5.png" width=300 class="zoom border center">
 
 5. Стяните пластины жесткости с помощью малой карбоновой деки.
 
-    <img src="../assets/assembling_clever4_2/frame_6.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/frame_6.png" width=300 class="zoom border center">
 
 6. Установите 4 нейлоновые стойки 6мм и закрепите их с помощью винтов М3х5.
 
-    <img src="../assets/assembling_clever4_2/frame_7.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/frame_7.png" width=300 class="zoom border center">
 
 ## Установка моторов
 
@@ -86,7 +86,10 @@
 
 2. Установите мотор на соответствующие отверстия в луче с помощью **винтов М3х5**.
 
-
+    <div class="image-group">
+        <img src="../assets/assembling_soldering_clever_4/motor_1.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/motor_2.png" width=300 class="zoom border">
+    </div>
 
 > **Caution** Убедитесь, что моторы закреплены с помощью винтов М3х5, в противном случае может возникнуть короткое замыкание между обмотками.
 
@@ -94,7 +97,17 @@
 
 1. На заранее закрепленные стойки установите плату распределения питания(PDB), она должна быть установлена таким образом, чтобы силовой кабель питания был направлен в сторону хвоста коптера.
 
+    <div class="image-group">
+        <img src="../assets/assembling_soldering_clever_4/esc_1.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/esc_2.png" width=300 class="zoom border">
+    </div>
+
 2. Установите регуляторы оборотов(ESC) в соответствующие места на луче и притяните хомутами.
+
+    <div class="image-group">
+        <img src="../assets/assembling_soldering_clever_4/esc_3.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/esc_4.png" width=300 class="zoom border">
+    </div>
 
 3. Отмерьте необходимое количество силового провода регуляторов оборотов(ESC), и обрежте лишнее.  
 
@@ -103,6 +116,11 @@
 5. Залудите контактные площадки на плате распределения питания.
 
 6. Припаяйте силовые провода регуляторов оборотов к плате распределения питания.
+
+    <div class="image-group">
+        <img src="../assets/assembling_soldering_clever_4/esc_5.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/esc_6.png" width=300 class="zoom border">
+    </div>
 
     > **Caution** Будте внимательны к подписям контактов на плате. Красный провод должен идти к площадке с подписью *+*, а черный к подписи *-*.
 
@@ -113,6 +131,18 @@
 9. Залудите контактные площадки регуляторов оборотов.
 
 10. Припаяйте фазные кабели к контактным площадкам регуляторов в любом порядке.
+
+    <div class="image-group">
+        <img src="../assets/assembling_soldering_clever_4/esc_7.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/esc_8.png" width=300 class="zoom border">
+    </div>
+
+11. Припаяйте 3 разъема *JST* мама к 2ум площадкам *5v* и площадке *bat+*
+
+    <div class="image-group">
+        <img src="../assets/assembling_soldering_clever_4/esc_9.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/esc_10.png" width=300 class="zoom border">
+    </div>
 
 ## Установка полетного контроллера
 
@@ -128,7 +158,11 @@
 
 2. Установите полетный контроллер и закрепите нейлоновыми гайками.
 
+    <img id="prop_rotation" src="../assets/assembling_soldering_clever_4/coex_pix_1.png" width=300 class="zoom border center">
+
 3. Вставьте флеш карту для записи логов в полетный контроллер.
+
+    <img id="prop_rotation" src="../assets/assembling_soldering_clever_4/coex_pix_2.png" width=300 class="zoom border center">
 
 ### Pixracer
 
@@ -136,24 +170,37 @@
 
 2. Установите малую крепежную деку и закрепите ее с помощью нейлоновых гаек.
 
+    <img id="prop_rotation" src="../assets/assembling_soldering_clever_4/coex_fc_1.png" width=300 class="zoom border center">
+
 3. Склейте 3-4 слоя двустороннего скотча, приклейте его в центр малой деки и установите сверху *Pixracer*.
+
+    <img id="prop_rotation" src="../assets/assembling_soldering_clever_4/coex_fc_2.png" width=300 class="zoom border center">
+
+4. Вставьте флеш карту для записи логов в полетный контроллер.
+
+    <img id="prop_rotation" src="../assets/assembling_soldering_clever_4/coex_fc_3.png" width=300 class="zoom border center">
 
 ## Подключение полетного контроллера
 
 1. Подключите регуляторы оборотов к полетному контроллеру в соответствии со схемой.
 
-    <img src="../assets/assembling_clever4_2/fc_connection_1.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/fc_connection_1.png" width=300 class="zoom border center">
 
 2. Подключите кабель питания к плате распределения питания(PDB) и соответствующему разъему на полетном контроллере.
 
-    <img src="../assets/assembling_clever4_2/fc_connection_2.png" width=300 class="zoom border center">
+    <div class="image-group">
+        <img src="../assets/assembling_soldering_clever_4/fc_connection_2.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/fc_connection_3.png" width=300 class="zoom border">
+    </div>
 
 3. Установите алюминиевые стойки 40мм на винты М3х12.
 
     <div class="image-group">
-        <img src="../assets/assembling_clever4_2/fc_connection_3.png" width=300 class="zoom border">
-        <img src="../assets/assembling_clever4_2/fc_connection_4.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/fc_connection_4.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/fc_connection_5.png" width=300 class="zoom border">
     </div>
+
+
 
 ## Установка Raspberry Pi
 
