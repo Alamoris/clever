@@ -200,103 +200,138 @@
         <img src="../assets/assembling_soldering_clever_4/fc_connection_5.png" width=300 class="zoom border">
     </div>
 
-
-
 ## Установка Raspberry Pi
 
-TODO: Пока не понятен процесс расширения крепежный отверстий малины.
+1. На монтажную деку установите стойки 20мм и 40мм, закрепите их с помощью винтов М3х8.
 
-1. На основную деку установите стойки 20мм, закрепите их с помощью винтов М3х8.
+    <img src="../assets/assembling_soldering_clever_4/raspberry_1.png" width=300 class="zoom border center">
+
+2. Нарежте резьбу М3 в крепежных отверстиях *Raspberry Pi* с помощью болта М3х12.
+
+3. Вкрутите в плату *Raspberry Pi* стойки 6мм, при необходимости закрепите их нейлоновыми гайками.
 
     <div class="image-group">
-        <img src="../assets/assembling_clever4_2/fc_connection_5.png" width=300 class="zoom border">
-        <img src="../assets/assembling_clever4_2/fc_connection_6.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/raspberry_2.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/raspberry_3.png" width=300 class="zoom border">
     </div>
 
-2. На монтажную деку установите стойки 6мм и стойки 30мм, закрепите их с помощью винт М3х5 и М3х12 соответственно.
+4. Установите *Raspberry Pi* на монтажную деку закрепив ее болтами М3х6.
 
-    <img src="../assets/assembling_clever4_2/raspberry_1.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/raspberry_4.png" width=300 class="zoom border center">
 
-3. Установите собранную монтажную деку на основную и закрепите с помощью винтов М3х8.
+5. Установите собранный модуль в соответсвующие пазы основной деке дрона.
 
-    <img src="../assets/assembling_clever4_2/raspberry_2.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/raspberry_5.png" width=300 class="zoom border center">
 
-4. Установите плату *Raspberry Pi* и зафиксируйте с помощью нейлоновых гаек.
+6. Подключите разъем 5v *JST* в соответсвующие пины питания *Raspberry Pi*.
 
-    <img src="../assets/assembling_clever4_2/raspberry_3.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/raspberry_6.png" width=300 class="zoom border center">
 
-5. На деку захвата установите дальномер с помощью самоконтрящихся гаек и винтов М3х8, и приклейте радиоприемник с помощью двустороннего скотча.
+7. Возьмите 4 провода *Dupont*, обрежте 5-7см кабеля и припаяйте к соответсвующим пинам дальномера.
 
-    <img src="../assets/assembling_clever4_2/raspberry_5.png" width=300 class="zoom border center">
+    <div class="image-group">
+        <img src="../assets/assembling_soldering_clever_4/raspberry_7.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/raspberry_8.png" width=300 class="zoom border">
+    </div>
 
-6. Установите 4 стойки 20мм и закрепите их с помощью винтов М3х8.
+    | Провод | Пин дальномера |
+    |--------|----------------|
+    | <font color=red>Красный</font> | 5v |
+    | <font color=black>Черный</font> | GND |
+    | <font color=yellow>Желтый</font> | SDA |
+    | <font color=green>Зеленый</font> | SCL |
 
-    <img src="../assets/assembling_clever4_2/raspberry_6.png" width=300 class="zoom border center">
+    <div class="image-group">
+        <img src="../assets/assembling_soldering_clever_4/raspberry_9.png" width=300 class="zoom border">
+        <img src="../assets/assembling_soldering_clever_4/raspberry_10.png" width=300 class="zoom border">
+    </div>
 
-7. На малую монтажную деку установите камеру и зафиксируйте ее с помощью 2ух саморезов М2х5, в верхнем левом и нижнем правом углах.
+8. Установите дальномер на деку захвата и Приклейте радиоприемник на 3М скотч.
 
-    <img src="../assets/assembling_clever4_2/raspberry_7.png" width=300 class="zoom border center">
+    > **Caution** Устанавливайте дальномер таки образом, чтобы гайки не прислонялись к плате напрямую. При такой установке если большая вероятность повредить элементы платы.
 
-8. Установите модуль камеры на деку захвата и закрепите с помощью винтов М3х8.
+    <img src="../assets/assembling_soldering_clever_4/raspberry_11.png" width=300 class="zoom border center">
 
-    <img src="../assets/assembling_clever4_2/raspberry_8.png" width=300 class="zoom border center">
+9. Установите 4 нейлоновые стойки 20мм и зафиксируйте их болтами М3х8.
 
-9. Установите собранную деку захвата и зафиксируйте с помощью винтов М3х8.
+    <img src="../assets/assembling_soldering_clever_4/raspberry_12.png" width=300 class="zoom border center">
 
-    <img src="../assets/assembling_clever4_2/raspberry_9.png" width=300 class="zoom border center">
+10. На малую монтажную деку установите камеру и зафиксируйте ее двумя короткими саморезами, как указано на рисунке.
 
-10. Подключите к *Raspberri Pi* дальномер и кабель питания.
+    > **Caution** Если закрепить камеру в верхнем правом углу и шляпка самореза будет касаться элемента на камере, камера не будет работать.
 
-    <img src="../assets/assembling_clever4_2/raspberry_10.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/raspberry_13.png" width=300 class="zoom border center">
 
-11. Подключите радиоприемник к полетному контроллеру используя разъем *RCIN*.
+11. Установите малую монтажную деку с камерой на стойки и зафиксируйте с помощью болтов М3х8.
 
-    <img src="../assets/assembling_clever4_2/radio.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/raspberry_14.png" width=300 class="zoom border center">
 
-12. Подключите шлейф камеры к *Raspberry Pi*.
+12. Собранный модуль установите на над модулем *Raspberry Pi* и зафиксируйте болтами М3х8.
 
-    <img src="../assets/assembling_clever4_2/raspberry_11.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/raspberry_15.png" width=300 class="zoom border center">
 
-13. Подключите полетный контроллер к *Raspberry Pi* с помощью USB кабеля.
+13. Соедините камеру и *Raspberry Pi* с помощью шлейфа.
 
-    <img src="../assets/assembling_clever4_2/final_2.png" width=300 class="zoom border">
+    <img src="../assets/assembling_soldering_clever_4/raspberry_16.png" width=300 class="zoom border center">
+
+14. Подсоедините дальномер к *Raspberry Pi* в соответсвующие пины.
+
+    <img src="../assets/assembling_soldering_clever_4/raspberry_17.png" width=300 class="zoom border center">
+
+15. Соедините с радиоприемник и полетный комнтроллер с помощью соответсвующего кабеля.
+
+    <img src="../assets/assembling_soldering_clever_4/raspberry_18.png" width=300 class="zoom border center">
 
 ## Установка LED ленты и ножек
 
 1. Соберите обруч для светодиодной ленты, объединив замок на концах.
 
-    <img src="../assets/assembling_clever4_2/led_1.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/led_1.png" width=300 class="zoom border center">
 
-2. Наклейте светодиодную ленту на обруч, для большей крепкости притяните ее с помощью 3-4 хомутов.
+2. Припаяйте *JST* папа к площадке питания и *Dupont* мама к сигнальной площадке.
 
-    <img src="../assets/assembling_clever4_2/led_2.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/led_2.png" width=300 class="zoom border center">
 
-3. Установите ножки на пластину жесткости с помощью самоконтрящихся гаек и винтов М3х8 используя только крайние монтажные отверстия. Снизу, между пластинами ножек установите демпферное силиконовое колечко.
+3. Наклейте светодиодную ленту на обруч, для большей крепкости притяните ее с помощью 3-4 хомутов.
 
-4. Отогните ножки назад и в специальный паз на них установите обруч со светодиодной лентой, таким образом, чтобы кабели подключения выходили с хвостовой стороны коптера.
+    <img src="../assets/assembling_soldering_clever_4/led_3.png" width=300 class="zoom border center">
 
-5. Закрепите ножки с помощью самоконтрящихся гаек и винтов М3х8.
+4. Установите ножки на пластину жесткости с помощью самоконтрящихся гаек и винтов М3х8 используя только крайние монтажные отверстия. Снизу, между пластинами ножек установите демпферное силиконовое колечко.
 
-6. Подключите питание светодиодной ленты(красный, черный кабели) в разъем JST на плате распределения питания.
+    <img src="../assets/assembling_soldering_clever_4/led_4.png" width=300 class="zoom border center">
 
-7. Подключите сигнальный выход светодиодной ленты(белый кабель) в *Raspberry Ri*, к пину *GPIO 21*.
+5. Отогните ножки назад и в специальный паз на них установите обруч со светодиодной лентой, таким образом, чтобы кабели подключения выходили с хвостовой стороны коптера.
+
+    <img src="../assets/assembling_soldering_clever_4/led_5.png" width=300 class="zoom border center">
+
+6. Закрепите ножки с помощью самоконтрящихся гаек и винтов М3х8.
+
+    <img src="../assets/assembling_soldering_clever_4/led_6.png" width=300 class="zoom border center">
+
+7. Подключите питание светодиодной ленты в разъем *JST* 5v на плате распределения питания.
+
+    <img src="../assets/assembling_soldering_clever_4/led_7.png" width=300 class="zoom border center">
+
+8. Подключите сигнальный выход светодиодной ленты в *Raspberry Ri*, к пину *GPIO 21*.
+
+    <img src="../assets/assembling_soldering_clever_4/led_8.png" width=300 class="zoom border center">
+
+9. Установите монтажную деку и закрепите ее винтами М3х8.
+
+    <img src="../assets/assembling_soldering_clever_4/led_9.png" width=300 class="zoom border center">
 
 ## Установка защиты
 
 1. Соберите нижний уровень защиты с помощью стоек 40мм и винтов М3х12.
 
-    <img src="../assets/assembling_clever4_2/guard_1.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/guard_1.png" width=300 class="zoom border center">
 
 2. Соберите верхний уровень защиты с помощью винтов М3х12.
 
-    <img src="../assets/assembling_clever4_2/guard_2.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/guard_2.png" width=300 class="zoom border center">
 
-3. Установите монтажную деку и закрепите ее винтами М3х8.
+3. Установите защиту и закрепите на лучах с помощью самоконтрящихся гаек и винтов М3х8.
 
-    <img src="../assets/assembling_clever4_2/guard_3.png" width=300 class="zoom border center">
-
-4. Установите защиту и закрепите на лучах с помощью самоконтрящихся гаек и винтов М3х8.
-
-    <img src="../assets/assembling_clever4_2/guard_4.png" width=300 class="zoom border center">
+    <img src="../assets/assembling_soldering_clever_4/guard_3.png" width=300 class="zoom border center">
 
 > **Success** Дрон собран, далее произведите ["настройку"](setup.md).

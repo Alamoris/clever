@@ -86,8 +86,6 @@
 
 2. Mount the motor on the corresponding holes in the beam using **M3x5 screws**.
 
-
-
 > **Caution** Make sure that the motors are secured with M3x5 screws, otherwise a short circuit between the windings may occur.
 
 ## Installing ESC and PDB
